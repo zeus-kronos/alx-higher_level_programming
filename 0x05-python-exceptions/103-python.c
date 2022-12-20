@@ -10,9 +10,10 @@
 #define PY_SSIZE_T_CLEAN
 
 /**
- * print_python_bytes - Prints some basic info about a Python bytes object
- * @p: A pointer to the Python bytes object
- */
+* print_python_bytes - Prints some basic info about a Python bytes object
+* @p: A pointer to the Python bytes object
+*/
+
 void print_python_bytes(PyObject *p)
 {
 	int i, bytes_len, n, error = 1;
