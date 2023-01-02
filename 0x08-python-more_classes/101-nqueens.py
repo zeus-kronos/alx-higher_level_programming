@@ -1,89 +1,107 @@
 #!/usr/bin/python3
-""" defines a Rectangle class"""
+'''A module for solving the N queens problem.
+'''
+import sys
 
 
-class Rectangle:
-    """Rectangle Class"""
-    number_of_instances = 0
-    print_symbol = '#'
+solutions = []
+'''The list of possible solutions to the N queens problem.
+'''
+n = 0
+'''The size of the chessboard.
+'''
+pos = None
+'''The list of possible positions on the chessboard.
+'''
 
-    def __init__(self, width=0, height=0):
-        """ Init Method """
-        self.width = width
-        self.height = height
-        Rectangle.number_of_instances += 1
 
-    @property
-    def width(self):
-        """getter def"""
-        return self.__width
+def get_input():
+    '''Retrieves and validates this program's argument.
+    Returns:
+        int: The size of the chessboard.
+    '''
+    global n
+    n = 0
+    if len(sys.argv) != 2:
+        print('Usage: nqueens N')
+        sys.exit(1)
+    try:
+        n = int(sys.argv[1])
+    except Exception:
+        print('N must be a number')
+        sys.exit(1)
+    if n < 4:
+        print('N must be at least 4')
+        sys.exit(1)
+    return n
 
-    @width.setter
-    def width(self, value):
-        """setter def"""
-        if type(value) is not int:
-            raise TypeError('width must be an integer')
-        if value < 0:
-            raise ValueError('width must be >= 0')
-        self.__width = value
 
-    @property
-    def height(self):
-        """getter def"""
-        return self.__height
+def is_attacking(pos0, pos1):
+    '''Checks if the positions of two queens are in an attacking mode.
+    Args:
+        pos0 (list or tuple): The first queen's position.
+        pos1 (list or tuple): The second queen's position.
+    Returns:
+        bool: True if the queens are in an attacking position else False.
+    '''
+    if (pos0[0] == pos1[0]) or (pos0[1] == pos1[1]):
+        return True
+    return abs(pos0[0] - pos1[0]) == abs(pos0[1] - pos1[1])
 
-    @height.setter
-    def height(self, value):
-        """setter def"""
-        if type(value) is not int:
-            raise TypeError('height must be an integer')
-        if value < 0:
-            raise ValueError('height must be >= 0')
-        self.__height = value
 
-    def area(self):
-        """define area def"""
-        return self.__width * self.__height
+def group_exists(group):
+    '''Checks if a group exists in the list of solutions.
+    Args:
+        group (list of integers): A group of possible positions.
+    Returns:
+        bool: True if it exists, otherwise False.
+    '''
+    global solutions
+    for stn in solutions:
+        i = 0
+        for stn_pos in stn:
+            for grp_pos in group:
+                if stn_pos[0] == grp_pos[0] and stn_pos[1] == grp_pos[1]:
+                    i += 1
+        if i == n:
+            return True
+    return False
 
-    def perimeter(self):
-        """define perimeter def"""
-        if self.__width == 0 or self.__height == 0:
-            return 0
-        return (self.__width * 2) + (self.__height * 2)
 
-    def __str__(self):
-        """define informal print str"""
-        if self.__width == 0 or self.__height == 0:
-            return ""
-        else:
-            hsh = str(self.print_symbol)
-            return ((hsh*self.__width + "\n")*self.__height)[:-1]
+def build_solution(row, group):
+    '''Builds a solution for the n queens problem.
+    Args:
+        row (int): The current row in the chessboard.
+        group (list of lists of integers): The group of valid positions.
+    '''
+    global solutions
+    global n
+    if row == n:
+        tmp0 = group.copy()
+        if not group_exists(tmp0):
+            solutions.append(tmp0)
+    else:
+        for col in range(n):
+            a = (row * n) + col
+            matches = zip(list([pos[a]]) * len(group), group)
+            used_positions = map(lambda x: is_attacking(x[0], x[1]), matches)
+            group.append(pos[a].copy())
+            if not any(used_positions):
+                build_solution(row + 1, group)
+            group.pop(len(group) - 1)
 
-    def __repr__(self):
-        """define official print repr"""
-        return 'Rectangle({}, {})'.format(self.__width, self.__height)
 
-    def __del__(self):
-        """define delete method"""
-        Rectangle.number_of_instances -= 1
-        print('Bye rectangle...')
+def get_solutions():
+    '''Gets the solutions for the given chessboard size.
+    '''
+    global pos, n
+    pos = list(map(lambda x: [x // n, x % n], range(n ** 2)))
+    a = 0
+    group = []
+    build_solution(a, group)
 
-    @staticmethod
-    def bigger_or_equal(rect_1, rect_2):
-        """
-            Biggest Rectangle (Rectangle)
-        """
-        if not isinstance(rect_1, Rectangle):
-            raise TypeError("rect_1 must be an instance of Rectangle")
-        if not isinstance(rect_2, Rectangle):
-            raise TypeError("rect_2 must be an instance of Rectangle")
-        Area1 = rect_1.area()
-        Area2 = rect_2.area()
-        if Area1 >= Area2:
-            return rect_1
-        return rect_2
 
-    @classmethod
-    def square(cls, size=0):
-        """ Returns a new Rectangle instance """
-        return (cls(size, size))
+n = get_input()
+get_solutions()
+for solution in solutions:
+    print(solution)
