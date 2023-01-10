@@ -1,10 +1,10 @@
 #!/usr/bin/python3
-"""Adds a new attribute to an object if it is possible"""
+"""this module defines a function that adds attributes to objects"""
 
 
-def add_attribute(clss, atrb, val):
-    """Using the method 'setattr()' to add attributes"""
-    if "__dict__" in dir(clss):
-        setattr(clss, atrb, val)
-    else:
+def add_attribute(obj, att, value):
+    """Add a new attribute to an object if possible
+    """
+    if not hasattr(obj, "__dict__"):
         raise TypeError("can't add new attribute")
+    setattr(obj, att, value)
